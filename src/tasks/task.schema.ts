@@ -66,6 +66,15 @@ export const uncompleteTaskSchema = {
   }),
 };
 
+export const updateTaskStatusSchema = {
+  body: Joi.object({
+    status: Joi.string().valid("completed", "pending").required(),
+  }),
+  params: Joi.object({
+    id: Joi.string().length(24).hex().required(),
+  }),
+};
+
 export const getTaskByStatusSchema = {
   body: Joi.object({
     status: Joi.string().valid("completed", "pending").required(),

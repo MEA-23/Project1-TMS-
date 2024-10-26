@@ -9,13 +9,13 @@ export const getAllTasks = async (
 ) => {
   const page = parseInt(req.query.page as string, 10) || 1;
   const limit = parseInt(req.query.limit as string, 10) || 10;
-
+  const isAdmin = req.user.role === "admin";
   try {
     const [tasks, totalTasks] = await Promise.all([
-      Task.find()
+      Task.find(isAdmin ? {} : { assignedTo: req.user._id })
         .skip((page - 1) * limit)
         .limit(limit),
-      Task.countDocuments(),
+      Task.countDocuments(isAdmin ? {} : { assignedTo: req.user._id }),
     ]);
 
     res.json({
@@ -42,7 +42,11 @@ export const getTask = async (
   next: NextFunction
 ) => {
   try {
-    const task = await Task.findById(req.params.id);
+    const isAdmin = req.user.role === "admin";
+    const task = await Task.findOne({
+      _id: req.params.id,
+      ...(isAdmin ? {} : { assignedTo: req.user._id }),
+    });
     if (!task) {
       return next(
         new ErrorHandlerClass(
@@ -71,7 +75,7 @@ export const createTask = async (
   next: NextFunction
 ) => {
   try {
-    const task = await Task.create(req.body);
+    const task = await Task.create({ ...req.body, addedBy: req.user._id });
     res.status(201).json(task);
   } catch (error) {
     next(
@@ -152,8 +156,54 @@ export const getTaskByStatus = async (
   next: NextFunction
 ) => {
   try {
-    const tasks = await Task.find({ status: req.params.status });
+    const isAdmin = req.user.role === "admin";
+    const tasks = await Task.find({
+      status: req.params.status,
+      ...(isAdmin ? {} : { assignedTo: req.user._id }),
+    });
     res.json(tasks);
+  } catch (error) {
+    next(
+      new ErrorHandlerClass(
+        "Internal Server Error",
+        500,
+        (error as Error).stack,
+        "API DATA"
+      )
+    );
+  }
+};
+
+export const updateTaskStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const isAdmin = req.user.role === "admin";
+    const status = !!(req.body.status == "completed");
+    console.log(status);
+    const task = await Task.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        ...(isAdmin ? {} : { assignedTo: req.user._id }),
+      },
+      { completed: status },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!task) {
+      return next(
+        new ErrorHandlerClass(
+          `Task not found with id ${req.params.id}`,
+          404,
+          "API DATA"
+        )
+      );
+    }
+    res.json(task);
   } catch (error) {
     next(
       new ErrorHandlerClass(
