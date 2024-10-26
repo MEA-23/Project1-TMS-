@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-
+// import { ISession } from "../users/session.model";
 declare module "express-serve-static-core" {
   interface Request {
-    authUser?: any;
+    user?: any;
   }
 }
 import User from "../users/user.model.js";
@@ -20,7 +20,8 @@ export const auth = async (
   next: NextFunction
 ): Promise<any> => {
   try {
-    const token = req.headers.token as string;
+    const token: any = req.headers.authorization;
+    console.log("token", token);
 
     if (!token) {
       return res
@@ -43,7 +44,9 @@ export const auth = async (
       process.env.JWT_SECRET as string
     ) as DecodedToken;
 
-    if (!decodedData?._id) {
+    console.log("decodedData", decodedData);
+
+    if (!decodedData?.userId || !decodedData?.sessionId) {
       return next(
         new ErrorHandlerClass(
           "Invalid Token Payload",
@@ -52,28 +55,24 @@ export const auth = async (
         )
       );
     }
-
-    const user = await User.findById(decodedData._id)
+    const user = await User.findById(decodedData.userId)
       .populate("sessionId")
       .select("-password");
-
     if (!user) {
       return next(
         new ErrorHandlerClass("Please sign up", 400, "Please sign up")
       );
     }
-
-    const validSession = user.sessionId?.some(
-      (session: any) => session.sessionId === decodedData.sessionId
+    const validSession = user.sessionId?.find(
+      (session) => session?._id.toString() === decodedData.sessionId
     );
-
     if (!validSession) {
       return next(
         new ErrorHandlerClass("Please login again", 400, "Please login again")
       );
     }
 
-    req.authUser = user;
+    req.user = user;
     next();
   } catch (error) {
     if (error instanceof Error) {
