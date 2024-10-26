@@ -13,20 +13,42 @@ import {
   getTaskByIdSchema,
   createTaskSchema,
   updateTaskSchema,
+  deleteTaskSchema,
 } from "./task.schema";
 import { auth } from "../auth/auth.middleware";
+import { errorHandle } from "../errors/error.middleware";
 
 const router = Router();
 
-router.get("/", auth, validationMiddleware(getAllTasksSchema), getAllTasks);
-router.get("/:id", auth, validationMiddleware(getTaskByIdSchema), getTask);
-router.post("/", auth, validationMiddleware(createTaskSchema), createTask);
-router.put("/:id", auth, validationMiddleware(updateTaskSchema), updateTask);
-router.delete(
+router.get(
+  "/",
+  auth,
+  validationMiddleware(getAllTasksSchema),
+  errorHandle(getAllTasks)
+);
+router.get(
   "/:id",
   auth,
   validationMiddleware(getTaskByIdSchema),
-  deleteTask
+  errorHandle(getTask)
+);
+router.post(
+  "/",
+  auth,
+  validationMiddleware(createTaskSchema),
+  errorHandle(createTask)
+);
+router.put(
+  "/:id",
+  auth,
+  validationMiddleware(updateTaskSchema),
+  errorHandle(updateTask)
+);
+router.delete(
+  "/:id",
+  auth,
+  validationMiddleware(deleteTaskSchema),
+  errorHandle(deleteTask)
 );
 
 export default router;

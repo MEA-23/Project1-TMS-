@@ -6,7 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 
 import taskRoutes from "./tasks/task.routes";
-// import userRoutes from "./users/user.routes";
+import userRoutes from "./users/user.routes";
 import { globalResponse } from "./errors/error.middleware";
 import { notFoundMiddleware } from "./middlewares/notFound.middleware";
 
@@ -29,16 +29,11 @@ mongoose
 
 // Routes
 app.use("/api/tasks", taskRoutes);
-// app.use("/api/users", userRoutes);
+app.use("/api/users", userRoutes);
 
 // Error Handling
 app.use(notFoundMiddleware);
-
-app.use((err: Error, req: Request, res: Response) => {
-  console.log("on notfound");
-  console.error(err.stack);
-  res.status(404).send("Not Found!");
-});
+app.use(globalResponse);
 
 // Start Server
 app.listen(PORT, () => {

@@ -3,6 +3,7 @@ import { ErrorHandlerClass } from "../errors/error.class";
 import User from "./user.model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 
 export const register = async (
   req: Request,
@@ -12,12 +13,20 @@ export const register = async (
   try {
     const { name, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+    const sessionId = uuidv4();
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
+      sessionId: [sessionId],
     });
-    res.status(201).json(newUser);
+
+    const token = jwt.sign(
+      { userId: newUser._id, role: newUser.role, sessionId },
+      process.env.JWT_SECRET || "your_jwt_secret"
+    );
+
+    res.status(201).json({ jwt: token });
   } catch (error) {
     next(
       new ErrorHandlerClass(
@@ -48,11 +57,16 @@ export const login = async (
         )
       );
     }
+
+    const sessionId = uuidv4();
+    user.sessionId.push({ sessionId });
+    await user.save();
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id, role: user.role, sessionId },
       process.env.JWT_SECRET || "your_jwt_secret"
     );
-    res.json({ token });
+
+    res.json({ jwt: token });
   } catch (error) {
     next(
       new ErrorHandlerClass(
