@@ -35,12 +35,13 @@ export const register = async (
 
     const newSession = await Session.create({ sessionId, userId: newUser._id });
 
-    newUser.sessionId = [newSession?._id];
+    newUser.sessionId = [newSession._id as any];
     await newUser.save();
 
     const token = jwt.sign(
       { userId: newUser._id, role: newUser.role, sessionId: newSession._id },
-      process.env.JWT_SECRET || "your_jwt_secret"
+      process.env.JWT_SECRET || "your_jwt_secret",
+      { expiresIn: "7d" }
     );
 
     res.status(201).json({ jwt: token });
@@ -78,11 +79,12 @@ export const login = async (
 
     const sessionId = uuidv4();
     const newSession = await Session.create({ sessionId, userId: user._id });
-    user.sessionId.push(newSession._id);
+    user.sessionId.push(newSession._id as any);
     await user.save();
     const token = jwt.sign(
       { userId: user._id, role: user.role, sessionId: newSession._id },
-      process.env.JWT_SECRET || "your_jwt_secret"
+      process.env.JWT_SECRET || "your_jwt_secret",
+      { expiresIn: "7d" }
     );
 
     res.json({ jwt: token });
