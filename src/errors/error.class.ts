@@ -2,13 +2,13 @@ export class ErrorHandlerClass {
   message: string;
   statusCode: number;
   stack?: string | null;
-  data: string;
+  data: any;
 
   constructor(
     message: string,
     statusCode: number,
     stack?: string | null,
-    data?: string
+    data?: any
   ) {
     this.message = message;
     this.statusCode = statusCode;
