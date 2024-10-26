@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express, { Application, NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import morgan from "morgan";
@@ -33,7 +33,12 @@ app.use("/api/tasks", taskRoutes);
 
 // Error Handling
 app.use(notFoundMiddleware);
-app.use(globalResponse);
+
+app.use((err: Error, req: Request, res: Response) => {
+  console.log("on notfound");
+  console.error(err.stack);
+  res.status(404).send("Not Found!");
+});
 
 // Start Server
 app.listen(PORT, () => {

@@ -1,12 +1,13 @@
 {
   "name": "project1-tms",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node ./src/app.ts",
-    "start": "node --loader ts-node/esm src/app.ts",
-    "build": "tsc"
+    "build": "rimraf dist && npx tsc",
+    "prestart": "npm run build",
+    "start": "node ./dist/app.js",
+    "dev": "npx tsc -w & nodemon ./dist/app.js"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +33,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.3",
     "morgan": "^1.10.0",
+    "rimraf": "^6.0.1",
     "uuid": "^10.0.0"
   }
 }
