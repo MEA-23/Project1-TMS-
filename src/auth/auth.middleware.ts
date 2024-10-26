@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-// import { ISession } from "../users/session.model";
 declare module "express-serve-static-core" {
   interface Request {
     user?: any;

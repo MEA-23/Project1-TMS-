@@ -4,7 +4,12 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  sessionId: [{ sessionId: string }];
+  sessionId: [
+    {
+      _id: any;
+      type: Schema.Types.ObjectId;
+    }
+  ];
   tasks: mongoose.Types.ObjectId[];
   role: "admin" | "user";
 }
