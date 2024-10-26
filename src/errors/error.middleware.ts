@@ -27,9 +27,9 @@ export const errorHandle = (API: ApiMiddlewareFunction) => {
 export const globalResponse = (
   err: any,
   message: string,
-  req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
+  req?: Request
 ) => {
   if (err) {
     res.status(err.statusCode || 500).json({

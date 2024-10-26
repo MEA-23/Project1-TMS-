@@ -34,12 +34,19 @@ export const login = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<Response | void> => {
+) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return next(
+        new ErrorHandlerClass(
+          "Invalid email or password",
+          400,
+          "Invalid email or password",
+          "API DATA"
+        )
+      );
     }
     const token = jwt.sign(
       { userId: user._id, role: user.role },
