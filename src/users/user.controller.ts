@@ -108,7 +108,7 @@ export const logout = async (
   try {
     const user = req.user;
     user.sessionId = user.sessionId.filter(
-      (sessionId: string) => sessionId !== req.sessionId
+      (sessionId: string) => sessionId !== req?.sessionId
     );
     await user.save();
     res.json({ message: "Logged out successfully" });

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 declare module "express-serve-static-core" {
   interface Request {
     user?: any;
+    sessionId?: string;
   }
 }
 import User from "../users/user.model.js";
@@ -72,6 +73,7 @@ export const auth = async (
     }
 
     req.user = user;
+    req.sessionId = decodedData.sessionId;
     next();
   } catch (error) {
     if (error instanceof Error) {
